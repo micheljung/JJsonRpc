@@ -1,5 +1,11 @@
 package com.nbarraille.jjsonrpc;
 
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Notification;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2ParseException;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -15,12 +21,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Notification;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2ParseException;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 
 /**
  * A JJsonPeer is an entity that can both send and receive JSON-RCP formatted requests,responses and notifications
@@ -390,7 +390,7 @@ public class JJsonPeer extends Thread {
 
 	/**
 	 * Processes a received response message.
-	 * @param rep the received response.
+	 * @param resp the received response.
 	 */
 	private void processResponse(JSONRPC2Response resp) {
 		// Retrieving response ID

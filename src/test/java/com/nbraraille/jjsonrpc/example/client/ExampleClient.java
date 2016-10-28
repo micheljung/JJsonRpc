@@ -1,4 +1,4 @@
-package com.nbarraille.jjsonrpc.example.client;
+package com.nbraraille.jjsonrpc.example.client;
 
 import java.io.IOException;
 import java.net.UnknownHostException;

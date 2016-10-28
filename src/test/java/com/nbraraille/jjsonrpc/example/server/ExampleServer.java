@@ -1,4 +1,4 @@
-package com.nbarraille.jjsonrpc.example.server;
+package com.nbraraille.jjsonrpc.example.server;
 
 import com.nbarraille.jjsonrpc.TcpServer;
 
