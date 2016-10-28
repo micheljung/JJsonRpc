@@ -1,22 +1,22 @@
 package com.nbraraille.jjsonrpc.example.client;
 
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.nbarraille.jjsonrpc.CallbackMethod;
 import com.nbarraille.jjsonrpc.InvalidMethodException;
 import com.nbarraille.jjsonrpc.JJsonPeer;
 import com.nbarraille.jjsonrpc.RemoteError;
 import com.nbarraille.jjsonrpc.TcpClient;
 
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class ExampleClient {
 
 	public static void main(String[] args) throws Exception {
 		try {
-			JJsonPeer peer = new TcpClient("localhost", 5512, ClientApi.class).getPeer();
+			JJsonPeer peer = new TcpClient("localhost", 5512, new ClientApi()).getPeer();
 			
 			List<Object> a = new ArrayList<Object>();
 			a.add(1.4);

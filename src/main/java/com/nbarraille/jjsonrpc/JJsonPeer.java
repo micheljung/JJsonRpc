@@ -61,7 +61,7 @@ public class JJsonPeer extends Thread {
 	private Socket _socket; // The socket used by the peer to communicate.
 	private InputStream _in; // The InputStream of the socket.
 	private PrintWriter _out; // The OutputStream of the socket.
-	private Class<?> _apiClass;
+	private Object _handler;
 	
 	/**
 	 * Creates a new Peer.
@@ -69,11 +69,11 @@ public class JJsonPeer extends Thread {
 	 * @throws IOException if the Socket is closed or not connected.
 	 * @throws ClassNotFoundException if the API Class is invalid.
 	 */
-	public JJsonPeer(Socket socket, Class<?> apiClass) throws IOException {
+	public JJsonPeer(Socket socket, Object handler) throws IOException {
 		_socket = socket;
 		_in = _socket.getInputStream();
 		_out = new PrintWriter(_socket.getOutputStream(), true);
-		_apiClass = apiClass;
+		_handler = handler;
 		_pendingRequests = Collections.synchronizedList(new ArrayList<PendingRequest>());
 		buildMethodsCache();
 	}
@@ -164,7 +164,7 @@ public class JJsonPeer extends Thread {
 	 */
 	private void buildMethodsCache() {
 		_methodsCache = new Hashtable<String, Set<Method>>();
-		Method[] methods = _apiClass.getMethods();
+		Method[] methods = _handler.getClass().getMethods();
 		for(Method m : methods) {
 			if(_methodsCache.containsKey(m.getName())) {
 				_methodsCache.get(m.getName()).add(m);
@@ -303,7 +303,7 @@ public class JJsonPeer extends Thread {
 				sendErrorResponse(ERROR_CODE_METHOD_NOT_FOUND, "Method Not Found", id);
 				return;
 			}
-			methodResponse = m.invoke(null, Helper.castParameters(params, m));
+			methodResponse = m.invoke(_handler, Helper.castParameters(params, m));
 		} catch (SecurityException e) {
 			// A Security Manager prevents the access to this method
 			// Sending Error Response
@@ -368,7 +368,7 @@ public class JJsonPeer extends Thread {
 		}
 		
 		try {
-			m.invoke(null, Helper.castParameters(params, m));
+			m.invoke(_handler, Helper.castParameters(params, m));
 		} catch (SecurityException e) {
 			// A Security Manager prevented the access to this method
 			_log.log(Level.INFO, "A Security Manager prevented the access to this method");

@@ -19,12 +19,12 @@ public class TcpClient {
 	 * Creates a new TCP Socket by connecting to a SocketServer, and creates a JJsonPeer that will use this socket to communicate.
 	 * @param serverAddress the address of the SocketServer to connect too.
 	 * @param serverListenerPort the port of the SocketServer to connect too.
-	 * @param apiClass the local "API Class", where all the methods that the other Peer can be remotely executed from the other peer are.
+	 * @param handler the local "API Class" where all the methods that the other Peer can be remotely executed from the other peer are.
 	 * @throws UnknownHostException the provided serverAddress or serverPort cannot be found.
 	 * @throws IOException if an I/O exception occurs while creating the Socket.
 	 */
-	public TcpClient(String serverAddress, int serverListenerPort, Class<?> apiClass) throws UnknownHostException, IOException {
-		_peer = new JJsonPeer(new Socket(serverAddress, serverListenerPort), apiClass);
+	public TcpClient(String serverAddress, int serverListenerPort, Object handler) throws IOException {
+		_peer = new JJsonPeer(new Socket(serverAddress, serverListenerPort), handler);
 		_log.log(Level.INFO, "TCP Client started");
 		_peer.start();
 	}
