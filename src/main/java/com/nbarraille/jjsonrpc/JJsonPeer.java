@@ -13,6 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -35,34 +36,34 @@ import java.util.logging.Logger;
  *    + The maximum number of concurrent requests is configurable (MAX_PENDING_REQUESTS)
  *    + There is a different Timeout for synchronous and asynchronous requests.
  *    + It is (supposed to be) thread-safe.
- *    + The methods the peer can execute on the local servers are limited to the ones in the API. 
- *    
+ *    + The methods the peer can execute on the local servers are limited to the ones in the API.
+ *
  * @author nbarraille <nathan.barraille@gmail.com>
  *
  */
 public class JJsonPeer extends Thread {
 	private final static int TIMEOUT_SYNC = 3000; // Request timeout in ms for synchronous calls.
-	private final static int TIMEOUT_ASYNC = 10000; // Request timeout in ms for asynchronous calls. 
+	private final static int TIMEOUT_ASYNC = 10000; // Request timeout in ms for asynchronous calls.
 	private final static int ERROR_CODE_PARSE_ERROR = -32700;
 	private final static int ERROR_CODE_INVALID_REQUEST = -32600;
 	private final static int ERROR_CODE_METHOD_NOT_FOUND = -32601;
 	private final static int ERROR_CODE_INVALID_PARAMS = -32602;
 	//private final static int ERROR_CODE_INTERNAL_ERROR = -32603;
 	private final static int ERROR_CODE_SERVER_ERROR = -32099;
-	
+
 	private final static int END_OF_MESSAGE_CHAR = 10;
 	private final static long MAX_PENDING_REQUESTS = 100;
 
-	
+
 	private Logger _log = Logger.getLogger(this.getClass().getCanonicalName()); // The logger object.
 	private Map<String, Set<Method>> _methodsCache;
 	private List<PendingRequest> _pendingRequests;
-	
+
 	private Socket _socket; // The socket used by the peer to communicate.
 	private InputStream _in; // The InputStream of the socket.
 	private PrintWriter _out; // The OutputStream of the socket.
 	private Object _handler;
-	
+
 	/**
 	 * Creates a new Peer.
 	 * @param socket the socket this Peer will use to communicate.
@@ -77,20 +78,20 @@ public class JJsonPeer extends Thread {
 		_pendingRequests = Collections.synchronizedList(new ArrayList<PendingRequest>());
 		buildMethodsCache();
 	}
-	
+
 	/**
 	 * Creates a new PendingRequest with the smallest unused ID, and adds it to the pending requests list.
 	 * If the callback method is null, the call will be considered synchronous and a WaitingPendingRequest will be
 	 * created. The result will be updated in the PendingRequest object when received.
 	 * If the callback method is not null, the request will be considered asynchronous, and a CallbackPendingRequest
 	 * will be created. The callback method will be called when the response is received.
-	 * 
+	 *
 	 * @param callback the callback method to call when the response arrives. If null, will not notify.
 	 * @return the id assigned to this request. Returns -1 if the pending request list is full.
 	 */
 	private long registerRequest(CallbackMethod callback) {
 		long id = -1;
-		
+
 		synchronized(_pendingRequests) {
 			for(long i = 0; i < MAX_PENDING_REQUESTS; i++) {
 				if(getPendingRequest(i) == null) {
@@ -98,7 +99,7 @@ public class JJsonPeer extends Thread {
 					break;
 				}
 			}
-			
+
 			if(id != -1) {
 				if(callback == null) {
 					_pendingRequests.add(new WaitingPendingRequest(id));
@@ -107,10 +108,10 @@ public class JJsonPeer extends Thread {
 				}
 			}
 		}
-		
+
 		return id;
 	}
-	
+
 	/**
 	 * Removes the Request with the given id, if it is in the list.
 	 * Thread-safe.
@@ -124,7 +125,7 @@ public class JJsonPeer extends Thread {
 			}
 		}
 	}
-	
+
 	/**
 	 * Retrieves the PendingRequest with the given id, if it exists, or null if it doesn't.
 	 * Thread-safe.
@@ -139,10 +140,10 @@ public class JJsonPeer extends Thread {
 				}
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * Removes the expired Pending Requests from the list (older than TIMEOUT_ASYNC)
 	 * Thread-safe.
@@ -157,7 +158,7 @@ public class JJsonPeer extends Thread {
 			}
 		}
 	}
-	
+
 	/**
 	 * Builds a cache of methods available for fast lookup when looking for compatible methods.
 	 * @throws ClassNotFoundException if the _apiClass is not a valid class.
@@ -175,7 +176,7 @@ public class JJsonPeer extends Thread {
 			}
 		}
 	}
-	
+
 	/**
 	 * Returns the first method with the provided name and compatible parameters.
 	 * Returns null if no methods match.
@@ -184,16 +185,16 @@ public class JJsonPeer extends Thread {
 	 */
 	private Method getCompatibleMethods(String name, Object[] params) {
 		Set<Method> methods = _methodsCache.get(name);
-		
+
 		if(methods == null)
 			return null;
-		
+
 		for(Method candidate : methods) {
 			if(Helper.areCompatible(params, candidate.getParameterTypes())) {
 				return candidate;
 			}
 		}
-		
+
 		return null;
 	}
 
@@ -221,7 +222,7 @@ public class JJsonPeer extends Thread {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Processes an incomming message from the InputStream. Tries to determine which kind of
 	 * message it is, and route it to the appropriate methods for processing.
@@ -251,11 +252,11 @@ public class JJsonPeer extends Thread {
 			return;
 		}
 	}
-	
+
 	/**
 	 * Processes a received request. Parses it, executes the call and returns the response.
 	 * If something wrong happens during the processing, an error response will be sent.
-	 * 
+	 *
 	 * @param req the received request.
 	 */
 	private void processRequest(JSONRPC2Request req) {
@@ -271,7 +272,7 @@ public class JJsonPeer extends Thread {
 			sendErrorResponse(ERROR_CODE_INVALID_REQUEST, "Invalid Request");
 			return;
 		}
-		
+
 		Object[] params = null;
 		Class<?>[] paramsTypes = null;
 		if(argsObj == null) { // Support for null params
@@ -293,7 +294,7 @@ public class JJsonPeer extends Thread {
 			sendErrorResponse(ERROR_CODE_INVALID_REQUEST, "Invalid Request", id);
 			return;
 		}
-		
+
 		// Locating and executing the method statically
 		Object methodResponse = null;
 		try {
@@ -324,11 +325,11 @@ public class JJsonPeer extends Thread {
 			sendErrorResponse(ERROR_CODE_SERVER_ERROR, "Server Error", id);
 			return;
 		}
-		
+
 		// Send Response
 		sendResponse(id, methodResponse);
 	}
-	
+
 	/**
 	 * Processes a received notification.
 	 * @param not the received notification.
@@ -336,7 +337,7 @@ public class JJsonPeer extends Thread {
 	private void processNotification(JSONRPC2Notification not) {
 		String method = not.getMethod();
 		Object argsObj = not.getParams();
-		
+
 		Object[] params = null;
 		Class<?>[] paramsTypes = null;
 		if(argsObj == null) {
@@ -358,15 +359,15 @@ public class JJsonPeer extends Thread {
 			_log.log(Level.INFO, "Invalid Request: Cannot retrieve List params");
 			return;
 		}
-		
+
 		// Locating and executing the method statically
 		Method m = getCompatibleMethods(method, params);
 		if(m == null) {
 			// Called wrong method, ignoring
-			_log.log(Level.INFO, "Method not found : " + method);
+			_log.log(Level.INFO, "Method not found : " + method+" with params "+ Arrays.asList(params));
 			return;
 		}
-		
+
 		try {
 			m.invoke(_handler, Helper.castParameters(params, m));
 		} catch (SecurityException e) {
@@ -386,7 +387,7 @@ public class JJsonPeer extends Thread {
 			return;
 		}
 	}
-	
+
 
 	/**
 	 * Processes a received response message.
@@ -402,10 +403,10 @@ public class JJsonPeer extends Thread {
 			_log.log(Level.INFO, "Invalid Response: Cannot retrieve ID");
 			return;
 		}
-		
+
 		// Retrieve the error if there was one
 		JSONRPC2Error error = resp.getError();
-		
+
 		synchronized(_pendingRequests) {
 			PendingRequest pr = getPendingRequest(id);
 			if(pr != null) {
@@ -432,8 +433,8 @@ public class JJsonPeer extends Thread {
 			}
 		}
 	}
-	
-	
+
+
 	/**
 	 * Returns the Socket through which this peer communicates.
 	 * @return the Socket of this peer.
@@ -441,7 +442,7 @@ public class JJsonPeer extends Thread {
 	public Socket getSocket() {
 		return _socket;
 	}
-	
+
 	/**
 	 * Formats a JSON-RPC 2.0 request, gives it an ID, sends it through the Socket
 	 * and waits for the response to arrive.
@@ -465,19 +466,19 @@ public class JJsonPeer extends Thread {
 				return null;
 			}
 		}
-		
+
 		JSONRPC2Request req = new JSONRPC2Request(methodName, args, id);
 		String s = req.toString();
-		
+
 		_log.log(Level.INFO, "Sending request:" + s);
 		synchronized(_out) {
 			_out.println(s);
 			_out.flush();
 		}
-		
+
 		return waitForResponse(id);
 	}
-	
+
 	/**
 	 * Formats a JSON-RPC 2.0 request, gives it an ID, sends it through the Socket and registers the callback
 	 * to be notified when the response will arrive.
@@ -506,19 +507,19 @@ public class JJsonPeer extends Thread {
 				return false;
 			}
 		}
-		
+
 		JSONRPC2Request req = new JSONRPC2Request(methodName, args, id);
 		String s = req.toString();
-		
+
 		_log.log(Level.INFO, "Sending request:" + s);
 		synchronized(_out) {
 			_out.println(s);
 			_out.flush();
 		}
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * Formats a JSON-RPC 2.0 notification and sends it through the Socket. A notification
 	 * is the same as a request except that it does not have an ID and does not require
@@ -536,7 +537,7 @@ public class JJsonPeer extends Thread {
 			_out.flush();
 		}
 	}
-	
+
 	/**
 	 * Formats a JSON-RPC 2.0 error response, with the id of the request, and send
 	 * it through the socket.
@@ -553,7 +554,7 @@ public class JJsonPeer extends Thread {
 			_out.flush();
 		}
 	}
-	
+
 	/**
 	 * Formats a JSON-RPC 2.0 error response with no ID, and sends it through the socket.
 	 * @param code the error code.
@@ -562,7 +563,7 @@ public class JJsonPeer extends Thread {
 	public void sendErrorResponse(int code, String message) {
 		sendErrorResponse(code, message, null);
 	}
-	
+
 	/**
 	 * Format a JSON-RPC 2.0 response containing the ID of the request and the Object returned
 	 * by the method called, and send it through the socket.
@@ -578,7 +579,7 @@ public class JJsonPeer extends Thread {
 			_out.flush();
 		}
 	}
-	
+
 	/**
 	 * Waits for the response of the request with the given id until it arrives or the timeout is reached.
 	 * Returns null if the timeout is reached or the id is invalid (shouldn't happen).
@@ -587,19 +588,19 @@ public class JJsonPeer extends Thread {
 	 */
 	private Object waitForResponse(long id) {
 		long startTime = System.currentTimeMillis();
-		
+
 		PendingRequest pr = getPendingRequest(id);
 		if(pr != null && pr instanceof WaitingPendingRequest) {
 			while(((WaitingPendingRequest) pr).getResult() == null && !((WaitingPendingRequest) pr).isError()
 					&& System.currentTimeMillis() - startTime < TIMEOUT_SYNC) {
 			}
-			
+
 			removeRequest(id);
-			return ((WaitingPendingRequest) pr).isError() ? 
+			return ((WaitingPendingRequest) pr).isError() ?
 					((WaitingPendingRequest) pr).getError() : ((WaitingPendingRequest) pr).getResult();
 		}
-		
+
 		return null;
-		
+
 	}
 }
