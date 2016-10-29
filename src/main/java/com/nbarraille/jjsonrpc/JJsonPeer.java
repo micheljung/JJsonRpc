@@ -204,20 +204,20 @@ public class JJsonPeer extends Thread {
 	public void run() {
 		try {
 			_log.log(Level.INFO, "JJSON Peer listening...");
-			while(true){
-				int b;
-				StringBuffer sb = new StringBuffer();
-				if(_in.available() != 0) {
-					// New data incoming, reading
-					while ((b = _in.read()) != END_OF_MESSAGE_CHAR) {
-					     sb.append((char) b);
-					}
-					String data = sb.toString();
-					//_log.log(Level.INFO, "Peer on port:" + _socket.getPort() + " said: " + data);
-					// Process data
-					routeIncomingData(data);
-				}
-			}
+      int b;
+      StringBuilder sb = new StringBuilder();
+      // New data incoming, reading
+      while ((b = _in.read()) != -1) {
+        if(b != END_OF_MESSAGE_CHAR) {
+          sb.append((char) b);
+        } else {
+          String data = sb.toString();
+          //_log.log(Level.INFO, "Peer on port:" + _socket.getPort() + " said: " + data);
+          // Process data
+          routeIncomingData(data);
+          sb = new StringBuilder();
+        }
+      }
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
