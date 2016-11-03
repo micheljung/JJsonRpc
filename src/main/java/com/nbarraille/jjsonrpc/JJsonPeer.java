@@ -77,6 +77,8 @@ public class JJsonPeer extends Thread {
 		_handler = handler;
 		_pendingRequests = Collections.synchronizedList(new ArrayList<PendingRequest>());
 		buildMethodsCache();
+		setName(getClass().getSimpleName());
+		setDaemon(true);
 	}
 
 	/**
