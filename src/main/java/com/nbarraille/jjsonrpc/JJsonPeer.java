@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -205,7 +206,7 @@ public class JJsonPeer extends Thread {
 	 */
 	public void run() {
 		try {
-			_log.log(Level.INFO, "JJSON Peer listening...");
+			_log.log(Level.INFO, "JJSON Peer listening");
       int b;
       StringBuilder sb = new StringBuilder();
       // New data incoming, reading
@@ -220,6 +221,8 @@ public class JJsonPeer extends Thread {
           sb = new StringBuilder();
         }
       }
+		} catch (SocketException e) {
+			_log.log(Level.INFO, "Connection has been closed (" + e.getMessage() + ")");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
