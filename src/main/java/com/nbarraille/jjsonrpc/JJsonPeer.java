@@ -52,7 +52,6 @@ public class JJsonPeer extends Thread {
 	//private final static int ERROR_CODE_INTERNAL_ERROR = -32603;
 	private final static int ERROR_CODE_SERVER_ERROR = -32099;
 
-	private final static int END_OF_MESSAGE_CHAR = 10;
 	private final static long MAX_PENDING_REQUESTS = 100;
 
 
@@ -209,11 +208,13 @@ public class JJsonPeer extends Thread {
 			_log.log(Level.INFO, "JJSON Peer listening");
       int b;
       StringBuilder sb = new StringBuilder();
+      int nestedObjectCount = 0;
       // New data incoming, reading
       while ((b = _in.read()) != -1) {
-        if(b != END_OF_MESSAGE_CHAR) {
-          sb.append((char) b);
-        } else {
+        sb.append((char) b);
+      	if(b == '{') {
+					nestedObjectCount++;
+				} else if(b == '}' && --nestedObjectCount == 0) {
           String data = sb.toString();
           //_log.log(Level.INFO, "Peer on port:" + _socket.getPort() + " said: " + data);
           // Process data
