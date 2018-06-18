@@ -33,6 +33,10 @@ public class TcpServer {
 		_listener.start();
 		_log.log(Level.INFO, "TCP Server started.");
 	}
+
+	public void stop() {
+		_listener.close();
+	}
 	
 	/**
 	 * Adds a Peer to the Peers list if it is not already in the list.
