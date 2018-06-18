@@ -20,9 +20,9 @@ public class TcpServer {
 	 * Creates a new Server that will listen for connections on the given port.
 	 * @param listenerPort the port to listen for connections on.
 	 */
-	public TcpServer(int listenerPort, Class<?> apiClass) {
+	public TcpServer(int listenerPort, Object handler) {
 		_peers = new ArrayList<JJsonPeer>();
-		_listener = new SocketListener(listenerPort, this, apiClass);
+		_listener = new SocketListener(listenerPort, this, handler);
 	}
 	
 	/**

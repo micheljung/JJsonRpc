@@ -12,13 +12,13 @@ public class SocketListener extends Thread {
 	private int _port;
 	private ServerSocket _socket;
 	private TcpServer _server;
-	private Class<?> _apiClass;
+	private Object _handler;
 	
-	public SocketListener(int port, TcpServer server, Class<?> apiClass) {
+	public SocketListener(int port, TcpServer server, Object handler) {
 		_port = port;
 		_socket = null;
 		_server = server;
-		_apiClass = apiClass;
+		_handler = handler;
 	}
 	
 	public void run() {
@@ -31,7 +31,7 @@ public class SocketListener extends Thread {
 		while(true) {
 			try {
 				Socket connected = _socket.accept();
-				JJsonPeer jp = new JJsonPeer(connected, _apiClass);
+				JJsonPeer jp = new JJsonPeer(connected, _handler);
 				_log.log(Level.INFO, "New client connected on port " + connected.getPort());
 				_server.addPeer(jp);
 				jp.start();
