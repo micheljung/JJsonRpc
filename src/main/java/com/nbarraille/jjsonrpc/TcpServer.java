@@ -1,7 +1,9 @@
 package com.nbarraille.jjsonrpc;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,6 +17,7 @@ public class TcpServer {
 	private Logger _log = Logger.getLogger(this.getClass().getCanonicalName()); // The logger object.
 	private SocketListener _listener;
 	private ArrayList<JJsonPeer> _peers;
+	private CompletableFuture<JJsonPeer> firstPeer = new CompletableFuture<>();
 	
 	/**
 	 * Creates a new Server that will listen for connections on the given port.
@@ -50,6 +53,10 @@ public class TcpServer {
 			}
 		}
 		_peers.add(peer);
+
+		if (!firstPeer.isDone()) {
+			firstPeer.complete(peer);
+		}
 	}
 	
 	/**
@@ -73,8 +80,21 @@ public class TcpServer {
 	public JJsonPeer getPeer(int index) {
 		return _peers.get(index);
 	}
-	
-	
+
+	/**
+	 * Returns a feature that will complete once the first peer connects
+	 */
+	public CompletableFuture<JJsonPeer> getFirstPeer() {
+		return firstPeer;
+	}
+
+	/**
+	 * Returns an (unmodifiable) list of peers
+	 */
+	public List<JJsonPeer> getPeers() {
+		return Collections.unmodifiableList(_peers);
+	}
+
 	/**
 	 * Sends a notification to all the peers connected to this server.
 	 * @param methodName the name of the method to execute on the remote peer.
