@@ -13,14 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -63,6 +56,8 @@ public class JJsonPeer extends Thread {
 	private InputStream _in; // The InputStream of the socket.
 	private PrintWriter _out; // The OutputStream of the socket.
 	private Object _handler;
+
+	private Optional<Runnable> connectionLossCallback = Optional.empty();
 
 	/**
 	 * Creates a new Peer.
@@ -224,8 +219,10 @@ public class JJsonPeer extends Thread {
       }
 		} catch (SocketException e) {
 			_log.log(Level.INFO, "Connection has been closed (" + e.getMessage() + ")");
+			connectionLossCallback.ifPresent(Runnable::run);
 		} catch (IOException e) {
 			e.printStackTrace();
+			connectionLossCallback.ifPresent(Runnable::run);
 		}
 	}
 
@@ -608,5 +605,9 @@ public class JJsonPeer extends Thread {
 
 		return null;
 
+	}
+
+	public void onConnectionLost(Runnable callback) {
+		this.connectionLossCallback = Optional.ofNullable(callback);
 	}
 }
