@@ -12,26 +12,29 @@ public class SocketListener extends Thread {
 	private int _port;
 	private ServerSocket _socket;
 	private TcpServer _server;
-	private Class<?> _apiClass;
+	private Object _handler;
+	private boolean running = false;
 	
-	public SocketListener(int port, TcpServer server, Class<?> apiClass) {
+	public SocketListener(int port, TcpServer server, Object handler) {
 		_port = port;
 		_socket = null;
 		_server = server;
-		_apiClass = apiClass;
+		_handler = handler;
 	}
 	
 	public void run() {
 		try {
 			_socket = new ServerSocket(_port);
 		} catch (IOException e1) {
-			e1.printStackTrace();
+			_log.log(Level.SEVERE, "Could not start RPC server.");
 		}
+
+		running = true;
 		
-		while(true) {
+		while(running) {
 			try {
 				Socket connected = _socket.accept();
-				JJsonPeer jp = new JJsonPeer(connected, _apiClass);
+				JJsonPeer jp = new JJsonPeer(connected, _handler);
 				_log.log(Level.INFO, "New client connected on port " + connected.getPort());
 				_server.addPeer(jp);
 				jp.start();
@@ -39,6 +42,16 @@ public class SocketListener extends Thread {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+
+	public void close() {
+		running = false;
+		this.interrupt();
+		try {
+			_socket.close();
+		} catch(IOException e) {
+			_log.log(Level.SEVERE, "Could not close RPC server socket.", e);
 		}
 	}
 

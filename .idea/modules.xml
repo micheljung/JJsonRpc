@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/JJsonRpc.iml" filepath="$PROJECT_DIR$/.idea/modules/JJsonRpc.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/JJsonRpc.iml" filepath="$PROJECT_DIR$/.idea/modules/JJsonRpc.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/JJsonRpc_main.iml" filepath="$PROJECT_DIR$/.idea/modules/JJsonRpc_main.iml" group="JJsonRpc" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/JJsonRpc_test.iml" filepath="$PROJECT_DIR$/.idea/modules/JJsonRpc_test.iml" group="JJsonRpc" />
     </modules>
